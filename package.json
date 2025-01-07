@@ -1,0 +1,29 @@
+{
+  "name": "CompanyLotteries",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test"
+  },
+  "keywords": [
+    "solidity",
+    "lottery",
+    "hardhat",
+    "blockchain"
+  ],
+  "author": "Yakup Altay",
+  "license": "MIT",
+  "description": "A Solidity smart contract for managing company lotteries.",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "ethers": "^6.13.4",
+    "hardhat": "^2.22.17"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
