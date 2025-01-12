@@ -1,6 +1,10 @@
 # CompanyLotteries.v2
 
-## **To Execute**
+## **Before you start**
+Make sure to add OP Sepolia Testnet on your MetaMask wallet: https://www.alchemy.com/overviews/how-to-add-sepolia-to-metamask
+
+OP Sepolia Faucet: https://console.optimism.io/faucet
+
 
 ### **1. Deploy the Contracts**
 In the main directory, run the following command to deploy the Diamond Proxy and its facets:
