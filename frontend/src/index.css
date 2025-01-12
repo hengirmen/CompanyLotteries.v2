@@ -1,0 +1,14 @@
+body {
+    background-color: #1a202c; /* Dark gray */
+    color: #e2e8f0; /* Light gray */
+}
+
+input, button, select, textarea {
+    background-color: #2d3748; /* Darker gray */
+    color: #e2e8f0; /* Light gray */
+    border: 1px solid #4a5568; /* Border gray */
+}
+
+button:hover {
+    background-color: #4a5568; /* Lighter hover color */
+}
