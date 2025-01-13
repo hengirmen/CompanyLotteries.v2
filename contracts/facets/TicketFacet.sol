@@ -281,6 +281,12 @@ contract TicketFacet {
 
         // Implement the winning ticket logic based on your lottery randomness process
         // Example: Check against a pre-determined list of winning ticket numbers
-        return ticketNo % lottery.noofwinners == 0;
+        for (uint256 i = 0; i < lottery.winningtickets.length; i++) {
+            if (lottery.winningtickets[i] == ticketNo) {
+                return true; // Ticket is a winner
+            }
+        }
+
+        return false; // Ticket is not a winner
     }
 }
