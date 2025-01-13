@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { getContract } from '../services/contractService';
 import BuyTicket from './BuyTicket';
+import MyTickets from './MyTickets';
 
 const LotteryList = ({ signer }) => {
     const [ongoingLotteries, setOngoingLotteries] = useState([]);
@@ -171,6 +172,31 @@ const LotteryList = ({ signer }) => {
                 ) : (
                     <p className="text-gray-400">No finished lotteries found.</p>
                 )}
+            </div>
+
+            <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-4">My Tickets</h2>
+                {/* Show tickets for ongoing lotteries */}
+                <div className="mb-6">
+                    <h3 className="text-xl font-semibold mb-4">Ongoing Lotteries</h3>
+                    {ongoingLotteries.map((lottery) => (
+                        <div key={lottery.id} className="mb-6">
+                            <h4 className="text-lg font-medium mb-2">Lottery #{lottery.id}</h4>
+                            <MyTickets signer={signer} lotteryId={lottery.id} />
+                        </div>
+                    ))}
+                </div>
+                
+                {/* Show tickets for finished lotteries */}
+                <div className="mb-6">
+                    <h3 className="text-xl font-semibold mb-4">Finished Lotteries</h3>
+                    {finishedLotteries.map((lottery) => (
+                        <div key={lottery.id} className="mb-6">
+                            <h4 className="text-lg font-medium mb-2">Lottery #{lottery.id}</h4>
+                            <MyTickets signer={signer} lotteryId={lottery.id} />
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );

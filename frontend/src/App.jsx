@@ -3,6 +3,7 @@ import ConnectWallet from './components/ConnectWallet';
 import AdminDashboard from './components/AdminDashboard';
 import LotteryList from './components/LotteryList';
 import Faucet from './components/Faucet';
+import LotteryDetails from './components/LotteryDetails';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -13,6 +14,7 @@ function App() {
     const [signer, setSigner] = useState(null);
     const [address, setAddress] = useState('');
     const [darkMode, setDarkMode] = useState(true); // Set Dark Mode as default
+    const [selectedLottery, setSelectedLottery] = useState(null); // Manage selected lottery
 
     const toggleDarkMode = () => setDarkMode(!darkMode);
 
@@ -52,9 +54,19 @@ function App() {
 
                             {/* Lottery List on the Right */}
                             <div className="lg:w-2/3 w-full">
-                                <LotteryList signer={signer} />
+                                <LotteryList
+                                    signer={signer}
+                                    onSelectLottery={(lottery) => setSelectedLottery(lottery)}
+                                />
                             </div>
                         </div>
+
+                        {/* Lottery Details */}
+                        {selectedLottery && (
+                            <div className="mt-8">
+                                <LotteryDetails signer={signer} lotteryId={selectedLottery.id} />
+                            </div>
+                        )}
                     </>
                 ) : (
                     <p className="text-center text-gray-500 mt-4">Please connect your wallet to use the DApp.</p>
