@@ -1,7 +1,8 @@
 # CompanyLotteries.v2
 
 ## **Before you start**
-Make sure to add OP Sepolia Testnet on your MetaMask wallet: https://www.alchemy.com/overviews/how-to-add-sepolia-to-metamask
+Make sure to add OP Sepolia Testnet on your MetaMask wallet.
+Network name: OP Sepolia, New RPC URL: https://sepolia.optimism.io, Chain ID: 11155420, Ticker: ETH, Block Explorer URL: https://sepolia-optimism.etherscan.io
 
 OP Sepolia Faucet: https://console.optimism.io/faucet
 
