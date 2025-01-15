@@ -167,7 +167,6 @@ contract TicketFacet {
         }
 
         // All checks passed; tickets are successfully revealed
-        // Optionally emit an event for successful reveals
         emit TicketsRevealed(lottery_no, msg.sender, sticketno, quantity, rnd_number);
     }
 
@@ -181,7 +180,6 @@ contract TicketFacet {
         // If lottery is still active but reveal phase ended, finalize it
         if (lottery.isActive && block.timestamp > lottery.unixreveal) {
             if (lottery.numsold >= (lottery.nooftickets * lottery.minpercentage) / 100) {
-                // This would fail in view function, needs separate transaction
                 return false;
             }
         }
@@ -325,8 +323,6 @@ contract TicketFacet {
         DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
         DiamondStorage.Lottery storage lottery = ds.lotteries[lotteryId];
 
-        // Implement the winning ticket logic based on your lottery randomness process
-        // Example: Check against a pre-determined list of winning ticket numbers
         for (uint256 i = 0; i < lottery.winningtickets.length; i++) {
             if (lottery.winningtickets[i] == ticketNo) {
                 return true; // Ticket is a winner
