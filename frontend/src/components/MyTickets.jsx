@@ -10,9 +10,6 @@ const MyTickets = ({ signer, lotteryId, isAdmin }) => {
     const [lotteryPhase, setLotteryPhase] = useState(null);
     const [randomNumber, setRandomNumber] = useState('');
 
-    /**
-     * Optional: Check lottery phase
-     */
     const getLotteryPhase = async () => {
         try {
             const lotteryContract = getContract(signer, 'LotteryFacet');
@@ -24,15 +21,12 @@ const MyTickets = ({ signer, lotteryId, isAdmin }) => {
             
             const now = Math.floor(Date.now() / 1000);
 
-            // Check if there's at least one winning ticket => "Finalized"
             try {
                 await lotteryContract.getIthWinningTicket(lotteryId, 1);
                 return 'Finalized';
             } catch {
-                // If fails, no winners => not finalized
             }
 
-            // If your contract provides "phaseTimes":
             const phaseTimes = await lotteryContract.getLotteryPhaseTimes(lotteryId);
             const purchaseEndTime = Number(phaseTimes[1]);
             const revealEndTime = Number(phaseTimes[2]);
@@ -85,12 +79,6 @@ const MyTickets = ({ signer, lotteryId, isAdmin }) => {
         }
     };
 
-    /**
-     * handleReveal:
-     * 1) Log the purchase-style hash (utf8 => keccak256).
-     * 2) Attempt on-chain reveal with rnd_number as uint256.
-     *    If mismatch => user can't win.
-     */
     const handleReveal = async (ticketNumber) => {
         if (!randomNumber) {
             toast.error('Please enter the same random string you used at purchase');
@@ -98,20 +86,16 @@ const MyTickets = ({ signer, lotteryId, isAdmin }) => {
         }
 
         try {
-            // Step 1: Show the purchase-style hash in console
             const revealHash = ethers.keccak256(
                 ethers.toUtf8Bytes(randomNumber)  
             );
             console.log(`Hash of "${randomNumber}":`, revealHash);
 
-            // Optionally remove "0x" if you want a clean print
             const revealHashNoPrefix = revealHash.replace(/^0x/, '');
             console.log(`Hash of "${randomNumber}" (no 0x prefix):`, revealHashNoPrefix);
 
-            // Step 2: On-chain reveal
             const ticketContract = getContract(signer, 'TicketFacet');
 
-            // Must pass a numeric uint256 for contract's keccak256(abi.encodePacked(rnd_number))
             const numericRnd = BigInt(randomNumber);
 
             const tx = await ticketContract.revealRndNumberTx(
@@ -123,12 +107,10 @@ const MyTickets = ({ signer, lotteryId, isAdmin }) => {
             await tx.wait();
 
             toast.success('Random number revealed successfully!');
-            // Re-fetch tickets to see updated "revealed" status
             fetchTickets();
 
         } catch (err) {
             console.error('Reveal error:', err);
-            // If mismatch => revert with "Random number does not match the hash!"
             if (
                 err.reason?.includes('Random number does not match') ||
                 err.toString().includes('Random number does not match the hash!')
@@ -142,7 +124,6 @@ const MyTickets = ({ signer, lotteryId, isAdmin }) => {
 
     useEffect(() => {
         fetchTickets();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [signer, lotteryId, isAdmin]);
 
     if (loading) return <div className="text-gray-400">Loading tickets...</div>;
