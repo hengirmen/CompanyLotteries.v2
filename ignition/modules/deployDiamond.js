@@ -13,7 +13,6 @@ async function getFunctionSelectors(contractName) {
             const functionSignature = `${fragment.name}(${fragment.inputs.map((input) => input.type).join(",")})`;
             const selector = ethers.keccak256(ethers.toUtf8Bytes(functionSignature)).slice(0, 10);
             functionSelectors.push(selector);
-            // console.log(`Processing function: ${fragment.name} => Signature: ${functionSignature} => Selector: ${selector}`); // Log for each function
         }
     }
 
@@ -74,7 +73,7 @@ async function main() {
             facetsWithSelectors.push({
                 facetAddress: addresses[facetName],
                 functionSelectors: selectors,
-                action: 0, // 0 = Add
+                action: 0,
             });
         }
 

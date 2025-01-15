@@ -25,7 +25,7 @@ const fetchMockERC20Address = () => {
     }
 };
 
-export const getContract = (signer, contractName) => {  // Removed async since we don't need it
+export const getContract = (signer, contractName) => {
     let abi;
     switch (contractName) {
         case 'LotteryFacet':
@@ -85,7 +85,7 @@ export const setPaymentToken = async (signer, tokenAddress) => {
 export const buyTicket = async (signer, lotteryId, quantity, hashRndNumber, overrides = {}) => {
     try {
         const contract = getContract(signer, 'TicketFacet');
-        
+
         console.log("Buying ticket with params:", {
             lotteryId,
             quantity,
@@ -128,7 +128,7 @@ export const approvePaymentToken = async (signer, tokenAddress, spender, amount)
         const contract = new ethers.Contract(tokenAddress, IERC20_ABI, signer);
         const address = await signer.getAddress();
         const currentAllowance = await contract.allowance(address, spender);
-        
+
         console.log("Current allowance:", currentAllowance.toString());
 
         if (currentAllowance < amount) {
@@ -161,13 +161,11 @@ export const getNumPurchaseTxs = async (signer, lotteryId) => {
 
 export const getIthPurchasedTicket = async (signer, lotteryId, index) => {
     const contract = getContract(signer, 'LotteryFacet');
-    return contract.getIthPurchasedTicket(index, lotteryId); 
+    return contract.getIthPurchasedTicket(index, lotteryId);
 };
 
-// New helper function to get ticket owner
 export const getTicketOwner = async (ticketContract, lotteryId, ticketNo) => {
     try {
-        // Call the ticketOwner function instead of accessing array
         const owner = await ticketContract.isTicketOwner(lotteryId, ticketNo);
         return owner;
     } catch (error) {
@@ -181,16 +179,16 @@ export const getUserTickets = async (signer, lotteryId, isAdmin) => {
         const lotteryContract = getContract(signer, 'LotteryFacet');
         const ticketContract = getContract(signer, 'TicketFacet');
         const address = await signer.getAddress();
-        
+
         const numTxs = await lotteryContract.getNumPurchaseTxs(lotteryId);
         const tickets = [];
-        
+
         for (let i = 1; i <= Number(numTxs); i++) {
             try {
                 const tx = await lotteryContract.getIthPurchasedTicket(i, lotteryId);
                 const startNumber = Number(tx[0]);
                 const quantity = Number(tx[1]);
-                
+
                 for (let j = 0; j < quantity; j++) {
                     const ticketNumber = startNumber + j;
                     try {
@@ -204,15 +202,15 @@ export const getUserTickets = async (signer, lotteryId, isAdmin) => {
                         let isWinner = false;
                         try {
                             isWinner = await ticketContract.checkIfMyTicketWon(
-                                lotteryId, 
+                                lotteryId,
                                 ticketNumber
                             );
                         } catch (error) {
                             console.warn(`Error checking winner status for ticket ${ticketNumber}:`, error);
                         }
-                        
+
                         const canView = isOwner || isAdmin;
-                        
+
                         if (canView) {
                             // Get actual owner address
                             const ownerAddress = await ticketContract.getTicketOwner(
@@ -236,7 +234,7 @@ export const getUserTickets = async (signer, lotteryId, isAdmin) => {
                 console.warn(`Error processing transaction ${i}:`, error);
             }
         }
-        
+
         return tickets;
     } catch (error) {
         console.error('Error in getUserTickets:', error);
