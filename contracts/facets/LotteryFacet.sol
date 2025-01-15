@@ -336,8 +336,6 @@ contract LotteryFacet {
         DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
         DiamondStorage.Lottery storage lottery = ds.lotteries[lotteryId];
 
-        // Implement your randomness logic here
-        // Example: Use blockhash or other randomness source
         uint256 randomIndex = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao))) % lottery.numsold;
         return randomIndex + 1; // Assuming ticket numbers start from 1
     }
