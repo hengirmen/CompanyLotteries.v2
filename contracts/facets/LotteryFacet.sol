@@ -312,4 +312,50 @@ contract LotteryFacet {
         // Return the payment token address associated with the lottery
         return lottery.paymenttoken;
     }
+
+    function finalizeLottery(uint256 lotteryId) external {
+        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
+        DiamondStorage.Lottery storage lottery = ds.lotteries[lotteryId];
+
+        require(lottery.isActive, "Lottery is not active");
+        require(block.timestamp > lottery.unixreveal, "Reveal phase has not ended");
+
+        // Ensure the lottery has enough participants
+        require(lottery.numsold >= (lottery.nooftickets * lottery.minpercentage) / 100, "Not enough tickets sold");
+
+        // Select winning tickets
+        for (uint256 i = 0; i < lottery.noofwinners; i++) {
+            uint256 winningTicket = selectRandomWinningTicket(lotteryId);
+            lottery.winningtickets.push(winningTicket);
+        }
+
+        lottery.isActive = false; // Mark the lottery as finalized
+    }
+
+    function selectRandomWinningTicket(uint256 lotteryId) internal view returns (uint256) {
+        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
+        DiamondStorage.Lottery storage lottery = ds.lotteries[lotteryId];
+
+        // Implement your randomness logic here
+        // Example: Use blockhash or other randomness source
+        uint256 randomIndex = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao))) % lottery.numsold;
+        return randomIndex + 1; // Assuming ticket numbers start from 1
+    }
+
+    function getLotteryPhaseTimes(uint256 lottery_no) public view returns (
+        uint256 startTime,
+        uint256 purchaseEndTime,
+        uint256 revealEndTime
+    ) {
+        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
+        DiamondStorage.Lottery storage lottery = ds.lotteries[lottery_no];
+        
+        require(lottery.unixbeg != 0, "Lottery does not exist!");
+        
+        return (
+            block.timestamp,
+            lottery.unixpurchase,
+            lottery.unixreveal
+        );
+    }
 }

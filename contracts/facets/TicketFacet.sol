@@ -173,8 +173,27 @@ contract TicketFacet {
 
 
     function checkIfMyTicketWon(uint256 lotteryId, uint256 ticketNo) external view returns (bool) {
-        // Determine if ticketNo is a winning ticket
-        return _isWinningTicket(lotteryId, ticketNo);
+        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
+        DiamondStorage.Lottery storage lottery = ds.lotteries[lotteryId];
+
+        require(block.timestamp > lottery.unixreveal, "Reveal phase has not ended");
+        
+        // If lottery is still active but reveal phase ended, finalize it
+        if (lottery.isActive && block.timestamp > lottery.unixreveal) {
+            if (lottery.numsold >= (lottery.nooftickets * lottery.minpercentage) / 100) {
+                // This would fail in view function, needs separate transaction
+                return false;
+            }
+        }
+
+        // Check if ticket is in winning tickets array
+        for (uint256 i = 0; i < lottery.winningtickets.length; i++) {
+            if (lottery.winningtickets[i] == ticketNo) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Function to check if the specified address owns a winning ticket in the specified lottery
@@ -272,6 +291,33 @@ contract TicketFacet {
             msg.sender,
             refundAmount
         );
+    }
+
+    function isTicketOwner(
+        uint256 lottery_no,
+        uint256 ticket_no,
+        address owner
+    ) public view returns (bool) {
+        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
+        DiamondStorage.Lottery storage lottery = ds.lotteries[lottery_no];
+        
+        require(lottery.unixbeg != 0, "Lottery does not exist!");
+        require(lottery.ticketOwner[ticket_no] != address(0), "Ticket does not exist!");
+        
+        return lottery.ticketOwner[ticket_no] == owner;
+    }
+
+    function getTicketOwner(
+        uint256 lottery_no,
+        uint256 ticket_no
+    ) public view returns (address) {
+        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
+        DiamondStorage.Lottery storage lottery = ds.lotteries[lottery_no];
+        
+        require(lottery.unixbeg != 0, "Lottery does not exist!");
+        require(lottery.ticketOwner[ticket_no] != address(0), "Ticket does not exist!");
+        
+        return lottery.ticketOwner[ticket_no];
     }
 
 

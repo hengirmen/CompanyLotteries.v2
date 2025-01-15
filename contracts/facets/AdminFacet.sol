@@ -3,18 +3,13 @@ pragma solidity ^0.8.27;
 
 import "../DiamondStorage.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AdminFacet {
+contract AdminFacet is Ownable {
     event PaymentTokenUpdated(address indexed oldToken, address indexed newToken);
     event ProceedsWithdrawn(uint256 lottery_no, uint256 totalProceeds, address owner);
     event LotteryCanceled(uint indexed lottery_no);
     event LotteryFinalized(uint indexed lottery_no, uint[] winners);
-    
-    modifier onlyOwner() {
-        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
-        require(msg.sender == ds.owner, "Only owner can perform this action");
-        _;
-    }
 
     // Helper function to check if the address is a contract
     function isContract(address addr) internal view returns (bool) {
@@ -25,14 +20,10 @@ contract AdminFacet {
         return size > 0;
     }
 
-
     // Function to set a new ERC20 token as the payment token for the current lottery
-    function setPaymentToken(address erctokenaddress) public {
+    function setPaymentToken(address erctokenaddress) public onlyOwner {
         // Access the shared storage
         DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
-
-        // Ensure the caller is the owner
-        require(msg.sender == ds.owner, "Caller is not the owner!");
 
         // Ensure the provided address is not zero (invalid address)
         require(erctokenaddress != address(0), "Invalid token address!");
@@ -79,12 +70,9 @@ contract AdminFacet {
     }
 
     // Function to finalize a lottery, selecting winners if the lottery has met the minimum ticket sales
-    function finalizeLottery(uint256 lottery_no) public {
+    function finalizeLottery(uint256 lottery_no) public onlyOwner {
         // Access the shared storage
         DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
-
-        // Ensure the caller is the owner
-        require(msg.sender == ds.owner, "Caller is not the owner!");
 
         // Retrieve the lottery details from the `lotteries` mapping
         DiamondStorage.Lottery storage lottery = ds.lotteries[lottery_no];
@@ -163,12 +151,9 @@ contract AdminFacet {
     }
 
     // Function to withdraw the proceeds from the lottery after it has been finalized
-    function withdrawTicketProceeds(uint256 lottery_no) public {
+    function withdrawTicketProceeds(uint256 lottery_no) public onlyOwner {
         // Access the shared storage
         DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
-
-        // Ensure the caller is the owner
-        require(msg.sender == ds.owner, "Caller is not the owner!");
 
         // Retrieve the specific lottery from the mapping
         DiamondStorage.Lottery storage lottery = ds.lotteries[lottery_no];
@@ -199,5 +184,13 @@ contract AdminFacet {
         emit ProceedsWithdrawn(lottery_no, totalProceeds, ds.owner);
     }
 
+    function getAdmin() public view returns (address) {
+        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
+        return ds.owner;
+    }
 
+    function owner() public view override returns (address) {
+        DiamondStorage.Storage storage ds = DiamondStorage.getStorage();
+        return ds.owner;
+    }
 }
