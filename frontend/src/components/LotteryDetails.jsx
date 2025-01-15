@@ -58,11 +58,9 @@ const LotteryDetails = ({ signer, lotteryId }) => {
             toast.error('Enter a valid random number.');
             return;
         }
-
+    
         try {
             const ticketContract = getContract(signer, 'TicketFacet');
-            const hashRndNumber = ethers.keccak256(ethers.toUtf8Bytes(randomNumber));
-
             const tx = await ticketContract.revealRndNumberTx(
                 lotteryId,
                 sticketno,
@@ -70,7 +68,7 @@ const LotteryDetails = ({ signer, lotteryId }) => {
                 randomNumber
             );
             await tx.wait();
-
+    
             toast.success('Random number revealed successfully!');
         } catch (error) {
             console.error('Error revealing random number:', error);

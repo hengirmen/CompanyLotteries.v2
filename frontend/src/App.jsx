@@ -13,6 +13,7 @@ function App() {
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
     const [address, setAddress] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
     const [darkMode, setDarkMode] = useState(true); // Set Dark Mode as default
     const [selectedLottery, setSelectedLottery] = useState(null); // Manage selected lottery
 
@@ -25,19 +26,31 @@ function App() {
             }`}
         >
             {/* Header */}
-            <header className="p-6 bg-blue-500 text-white dark:bg-blue-700 flex items-center justify-between">
-                <button
-                    onClick={toggleDarkMode}
-                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 transition"
-                >
-                    {darkMode ? 'Light Mode' : 'Dark Mode'}
-                </button>
-                <h1 className="text-3xl font-bold text-center flex-1">Lottery DApp</h1>
+            <header className="p-6 bg-blue-500 text-white dark:bg-blue-700">
+                <div className="container mx-auto flex items-center justify-between">
+                    {/* Left: Logo */}
+                    <div className="flex items-center">
+                        <img 
+                            src="/logo.png" 
+                            alt="Lottery DApp Logo" 
+                            className="h-24 w-auto mr-4"
+                        />
+                    </div>
+
+                    {/* Right: Dark Mode Toggle */}
+                    <button
+                        onClick={toggleDarkMode}
+                        className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 
+                                dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 transition"
+                    >
+                        {darkMode ? 'Light Mode' : 'Dark Mode'}
+                    </button>
+                </div>
             </header>
 
             {/* Connect Wallet Section */}
             <div className="p-6">
-                <ConnectWallet setSigner={setSigner} setProvider={setProvider} setAddress={setAddress} />
+                <ConnectWallet setSigner={setSigner} setProvider={setProvider} setAddress={setAddress} setIsAdmin={setIsAdmin} />
                 {signer ? (
                     <>
                         {/* Faucet Component */}
@@ -48,16 +61,20 @@ function App() {
                         {/* Layout for Admin Dashboard and Lottery List */}
                         <div className="flex flex-col lg:flex-row gap-6 mt-6">
                             {/* Admin Dashboard on the Left */}
-                            <div className="lg:w-1/3 w-full">
-                                <AdminDashboard signer={signer} />
-                            </div>
+                            {isAdmin && (
+                                <div className="lg:w-1/3 w-full">
+                                    <AdminDashboard signer={signer} />
+                                </div>
+                            )}
 
                             {/* Lottery List on the Right */}
-                            <div className="lg:w-2/3 w-full">
-                                <LotteryList
-                                    signer={signer}
-                                    onSelectLottery={(lottery) => setSelectedLottery(lottery)}
-                                />
+                            <div className={`${isAdmin ? 'lg:w-2/3' : 'w-full'}`}>
+                            <LotteryList
+                                signer={signer}
+                                address={address}
+                                isAdmin={isAdmin}
+                                onSelectLottery={(lottery) => setSelectedLottery(lottery)}
+                            />
                             </div>
                         </div>
 

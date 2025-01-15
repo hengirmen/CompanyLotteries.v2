@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { ethers } from 'ethers';
 import { requestFaucetTokens } from '../services/contractService';
 
 const Faucet = ({ signer }) => {
@@ -9,7 +10,9 @@ const Faucet = ({ signer }) => {
     const handleRequestTokens = async () => {
         setIsRequesting(true);
         try {
-            await requestFaucetTokens(signer, amount);
+            // Parse amount to proper decimal format
+            const amountInWei = ethers.parseEther(amount);
+            await requestFaucetTokens(signer, amountInWei);
             toast.success('Tokens requested successfully!');
         } catch (error) {
             console.error('Error requesting tokens:', error);
@@ -21,9 +24,9 @@ const Faucet = ({ signer }) => {
 
     return (
         <div className="faucet bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-lg font-bold mb-4">MockERC20 Faucet</h3>
+            <h3 className="text-white font-bold mb-4">MockERC20 Faucet</h3>
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-white">
                     Amount:
                 </label>
                 <input

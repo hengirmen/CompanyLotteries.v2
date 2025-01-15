@@ -162,69 +162,139 @@ export const getNumPurchaseTxs = async (signer, lotteryId) => {
 export const getIthPurchasedTicket = async (signer, lotteryId, index) => {
     const contract = getContract(signer, 'LotteryFacet');
     return contract.getIthPurchasedTicket(index, lotteryId); 
-    // <== IMPORTANT: arguments must match the contract’s order
 };
 
-export const getUserTickets = async (signer, lotteryId) => {
+// New helper function to get ticket owner
+export const getTicketOwner = async (ticketContract, lotteryId, ticketNo) => {
+    try {
+        // Call the ticketOwner function instead of accessing array
+        const owner = await ticketContract.isTicketOwner(lotteryId, ticketNo);
+        return owner;
+    } catch (error) {
+        console.warn(`Error getting owner for ticket ${ticketNo}:`, error);
+        return null;
+    }
+};
+
+export const getUserTickets = async (signer, lotteryId, isAdmin) => {
     try {
         const lotteryContract = getContract(signer, 'LotteryFacet');
         const ticketContract = getContract(signer, 'TicketFacet');
         const address = await signer.getAddress();
         
-        // Get lottery info to check if finished
-        const rawInfo = await lotteryContract.getLotteryInfo(lotteryId);
-        const now = Math.floor(Date.now() / 1000);
-        const isFinished = now > Number(rawInfo[0]);
-        
-        // Get number of transactions
         const numTxs = await lotteryContract.getNumPurchaseTxs(lotteryId);
-        console.log(`Processing lottery ${lotteryId}, transactions: ${numTxs}`);
-        
         const tickets = [];
+        
         for (let i = 1; i <= Number(numTxs); i++) {
             try {
                 const tx = await lotteryContract.getIthPurchasedTicket(i, lotteryId);
                 const startNumber = Number(tx[0]);
                 const quantity = Number(tx[1]);
                 
-                let isWinner = false;
-                let revealed = false;
-                
-                if (isFinished) {
+                for (let j = 0; j < quantity; j++) {
+                    const ticketNumber = startNumber + j;
                     try {
-                        // For finished lotteries, check if ticket won
-                        isWinner = await ticketContract.checkIfMyTicketWon(lotteryId, startNumber);
-                        // If we can check winner status, ticket must be revealed
-                        revealed = true;
-                    } catch (error) {
-                        if (error.message.includes("Reveal phase has not ended")) {
-                            revealed = false;
-                        } else {
-                            console.log(`Winner check failed for ticket ${startNumber}: ${error.message}`);
+                        const isOwner = await ticketContract.isTicketOwner(
+                            lotteryId,
+                            ticketNumber,
+                            address
+                        );
+
+                        // Check if ticket is a winner
+                        let isWinner = false;
+                        try {
+                            isWinner = await ticketContract.checkIfMyTicketWon(
+                                lotteryId, 
+                                ticketNumber
+                            );
+                        } catch (error) {
+                            console.warn(`Error checking winner status for ticket ${ticketNumber}:`, error);
                         }
+                        
+                        const canView = isOwner || isAdmin;
+                        
+                        if (canView) {
+                            // Get actual owner address
+                            const ownerAddress = await ticketContract.getTicketOwner(
+                                lotteryId,
+                                ticketNumber
+                            );
+
+                            tickets.push({
+                                ticketNumber,
+                                owner: ownerAddress,
+                                isOwner,
+                                canView,
+                                isWinner
+                            });
+                        }
+                    } catch (error) {
+                        console.warn(`Error checking ticket ${ticketNumber}:`, error);
                     }
                 }
-
-                // Add ticket to list
-                tickets.push({
-                    startNumber,
-                    quantity,
-                    revealed,
-                    isWinner,
-                    isFinished
-                });
-                
-                console.log(`Found ticket: Lottery ${lotteryId}, Start ${startNumber}, Quantity ${quantity}, Revealed: ${revealed}, Winner: ${isWinner}`);
             } catch (error) {
                 console.warn(`Error processing transaction ${i}:`, error);
-                continue;
             }
         }
         
-        console.log(`Found ${tickets.length} tickets for lottery ${lotteryId}`);
         return tickets;
     } catch (error) {
         console.error('Error in getUserTickets:', error);
+        throw error;
+    }
+};
+
+export const revealTicket = async (signer, lotteryId, startNumber, quantity, randomNumber) => {
+    try {
+        const ticketContract = getContract(signer, 'TicketFacet');
+        const tx = await ticketContract.revealRndNumberTx(
+            lotteryId,
+            startNumber,
+            quantity,
+            randomNumber
+        );
+        await tx.wait();
+        return true;
+    } catch (error) {
+        console.error('Error revealing ticket:', error);
+        throw error;
+    }
+};
+
+export const withdrawTicketProceeds = async (signer, lotteryId) => {
+    try {
+        const contract = getContract(signer, 'AdminFacet');
+        const tx = await contract.withdrawTicketProceeds(lotteryId);
+        await tx.wait();
+        return true;
+    } catch (error) {
+        console.error('Error withdrawing proceeds:', error);
+        throw error;
+    }
+};
+
+export const getRevealPhaseEndTime = async (signer, lotteryId) => {
+    try {
+        const lotteryContract = getContract(signer, 'LotteryFacet');
+        const revealPhaseEndTime = await lotteryContract.getRevealPhaseEndTime(lotteryId);
+        return revealPhaseEndTime;
+    } catch (error) {
+        console.error('Error fetching reveal phase end time:', error);
+        throw error;
+    }
+};
+
+export const getLotteryPhaseTimes = async (signer, lotteryId) => {
+    try {
+        const lotteryContract = getContract(signer, 'LotteryFacet');
+        const phaseTimes = await lotteryContract.getLotteryPhaseTimes(lotteryId);
+        return {
+            startTime: Number(phaseTimes[0]),
+            purchaseEndTime: Number(phaseTimes[1]),
+            revealEndTime: Number(phaseTimes[2])
+        };
+    } catch (error) {
+        console.error('Error fetching lottery phase times:', error);
         throw error;
     }
 };

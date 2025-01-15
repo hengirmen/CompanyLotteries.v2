@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Company Lotteries</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #374151;
+            padding: 20px;
+            border-radius: 8px;
+            border-bottom: 4px solid #3b82f6;
+        }
+        .header h1 {
+            color: #ffffff;
+            font-size: 2.25rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .header p {
+            color: #9ca3af;
+            margin-top: 8px;
+        }
+        .section {
+            margin-bottom: 25px;
+            background-color: #374151;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .important {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .note {
+            background-color: #1f2937;
+            padding: 15px;
+            border-left: 4px solid #3b82f6;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        h1, h2, h3 {
+            color: #ffffff;
+            font-weight: bold;
+        }
+        ul, ol {
+            padding-left: 20px;
+            color: #d1d5db;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #9ca3af;
+            padding: 20px;
+            background-color: #374151;
+            border-radius: 8px;
+        }
+        .app-header {
+            padding: 1.5rem;
+            background-color: #1d4ed8; /* bg-blue-700 */
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 6rem; /* h-24 */
+            width: auto;
+            margin-right: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <div class="logo-container">
+                <img src="logo.png" alt="Lottery DApp Logo" class="logo" />
+            </div>
+        </div>
+    </header>
+
+    <div class="section">
+        <h2>How It Works</h2>
+        <ol>
+            <li>Purchase tickets during the Purchase Phase</li>
+            <li>Keep your random number secret until the Reveal Phase</li>
+            <li>Reveal your number during the Reveal Phase</li>
+            <li>Winners are selected automatically after the Reveal Phase ends</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>Important Rules</h2>
+        <ul>
+            <li class="important">You must reveal your random number during the Reveal Phase to be eligible to win</li>
+            <li>Each ticket requires a unique random number</li>
+            <li>The lottery will only proceed if the minimum ticket requirement is met</li>
+            <li>If minimum requirements are not met, all participants can claim refunds</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Phases</h2>
+        <h3>1. Purchase Phase</h3>
+        <p>During this phase, participants can buy tickets. Each ticket requires:</p>
+        <ul>
+            <li>Payment in the specified token</li>
+            <li>A secret random number (keep it safe!)</li>
+        </ul>
+
+        <h3>2. Reveal Phase</h3>
+        <p>During this phase, participants must:</p>
+        <ul>
+            <li>Reveal their random numbers</li>
+            <li>Verify their ticket ownership</li>
+        </ul>
+    </div>
+
+    <div class="note">
+        <p><strong>Note:</strong> Failure to reveal your random number during the Reveal Phase will result in ticket invalidation.</p>
+    </div>
+
+    <div class="section">
+        <h2>Winner Selection</h2>
+        <p>Winners are selected through a verifiable random process that combines:</p>
+        <ul>
+            <li>Participant-provided random numbers</li>
+            <li>Blockchain-based randomness</li>
+            <li>Timestamp data</li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>This lottery is governed by smart contracts on the blockchain. All operations are transparent and verifiable.</p>
+    </footer>
+</body>
+</html>

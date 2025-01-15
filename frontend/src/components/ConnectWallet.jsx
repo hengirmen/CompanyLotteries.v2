@@ -1,29 +1,37 @@
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
+import { getContract } from '../services/contractService';
 
-const ConnectWallet = ({ setSigner, setProvider, setAddress }) => {
+const ConnectWallet = ({ setSigner, setProvider, setAddress, setIsAdmin }) => {
     const [isConnected, setIsConnected] = useState(false);
     const [walletAddress, setWalletAddress] = useState('');
 
     const connectWallet = async () => {
         if (window.ethereum) {
             try {
-                // Request account access
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
-                // Create provider and signer
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const address = await signer.getAddress();
-
-                // Update state with provider, signer, and address
+    
+                // Get admin contract and check ownership
+                const adminContract = getContract(signer, 'AdminFacet');
+                const adminAddress = await adminContract.getAdmin();
+                const isAdmin = adminAddress.toLowerCase() === address.toLowerCase();
+                
+                console.log('Connected address:', address);
+                console.log('Admin address:', adminAddress);
+                console.log('Is admin:', isAdmin);
+    
                 setProvider(provider);
                 setSigner(signer);
                 setAddress(address);
                 setWalletAddress(address);
+                setIsAdmin(isAdmin);
                 setIsConnected(true);
-
+    
                 toast.success('Wallet connected successfully!');
             } catch (error) {
                 console.error('Wallet connection error:', error);
@@ -40,6 +48,7 @@ const ConnectWallet = ({ setSigner, setProvider, setAddress }) => {
         setAddress(null);
         setWalletAddress('');
         setIsConnected(false);
+        setIsAdmin(false);
         toast.info('Wallet disconnected.');
     };
 

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { createLottery, setPaymentToken } from '../services/contractService';
+import React, { useState, useEffect } from 'react';
+import { getContract, createLottery, setPaymentToken, withdrawTicketProceeds } from '../services/contractService';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
@@ -13,6 +13,8 @@ const AdminDashboard = ({ signer }) => {
     const [htmlHash, setHtmlHash] = useState('');
     const [url, setUrl] = useState('');
     const [darkMode, setDarkMode] = useState(false);
+    const [selectedLotteryId, setSelectedLotteryId] = useState('');
+    const [withdrawing, setWithdrawing] = useState(false);
 
     const handleCreateLottery = async (e) => {
         e.preventDefault();
@@ -49,6 +51,51 @@ const AdminDashboard = ({ signer }) => {
             toast.error('Failed to set payment token.');
         }
     };
+
+const handleWithdrawProceeds = async (e) => {
+    e.preventDefault();
+    if (!selectedLotteryId) {
+        toast.error('Please enter a lottery ID');
+        return;
+    }
+
+    setWithdrawing(true);
+    try {
+        const adminContract = getContract(signer, 'AdminFacet');
+        const lotteryContract = getContract(signer, 'LotteryFacet');
+        
+        // Check if lottery is finalized first
+        try {
+            await lotteryContract.getIthWinningTicket(selectedLotteryId, 1);
+        } catch (error) {
+            toast.error('Cannot withdraw: Lottery is not finalized yet');
+            return;
+        }
+
+        await toast.promise(
+            withdrawTicketProceeds(signer, selectedLotteryId),
+            {
+                pending: 'Processing withdrawal...',
+                success: 'Proceeds withdrawn successfully!',
+                error: {
+                    render({data}) {
+                        console.error('Withdrawal error:', data);
+                        return data.message.includes('already been withdrawn') 
+                            ? 'Proceeds have already been withdrawn'
+                            : 'Failed to withdraw proceeds';
+                    }
+                }
+            }
+        );
+        
+        setSelectedLotteryId('');
+    } catch (error) {
+        console.error('Error withdrawing proceeds:', error);
+        toast.error('Failed to withdraw proceeds');
+    } finally {
+        setWithdrawing(false);
+    }
+};
 
     return (
         <div
@@ -103,7 +150,7 @@ const AdminDashboard = ({ signer }) => {
                         />
                     </label>
                     <label className="block">
-                        <span className="text-white">Ticket Price (ETH):</span>
+                        <span className="text-white">Ticket Price:</span>
                         <input
                             type="number"
                             step="0.0001"
@@ -161,6 +208,32 @@ const AdminDashboard = ({ signer }) => {
                         Set Payment Token
                     </button>
                 </form>
+
+            {/* Withdraw Proceeds Form */}
+            <form onSubmit={handleWithdrawProceeds} className="space-y-4 mt-8">
+                <h3 className="text-xl font-semibold text-white">Withdraw Lottery Proceeds</h3>
+                <label className="block">
+                    <span className="text-white">Lottery ID:</span>
+                    <input
+                        type="number"
+                        value={selectedLotteryId}
+                        onChange={(e) => setSelectedLotteryId(e.target.value)}
+                        className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white"
+                        required
+                        disabled={withdrawing}
+                    />
+                </label>
+                <button
+                    type="submit"
+                    className={`w-full rounded-md px-4 py-2 text-white 
+                        ${withdrawing 
+                            ? 'bg-gray-500 cursor-not-allowed' 
+                            : 'bg-green-500 hover:bg-green-600'}`}
+                    disabled={withdrawing}
+                >
+                    {withdrawing ? 'Withdrawing...' : 'Withdraw Proceeds'}
+                </button>
+            </form>
             </div>
         </div>
     );
