@@ -1,19 +1,17 @@
-const { ethers } = require("ethers");
+import { ethers } from 'ethers';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Function to compute the hash
-const computeHash = (metadata) => {
-    try {
-        const hash = ethers.solidityPackedKeccak256(['string'], [metadata]);
-        console.log(`Metadata: ${metadata}`);
-        console.log(`Computed Hash: ${hash}`);
-        return hash;
-    } catch (error) {
-        console.error("Error computing hash:", error);
-    }
-};
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-// Example metadata
-const metadata = "Lottery4"; // Replace this with your metadata string
-
-// Compute the hash
-computeHash(metadata);
+try {
+    const htmlPath = join(__dirname, 'frontend', 'public', 'lottery.html');
+    const htmlContent = readFileSync(htmlPath, 'utf8');
+    const contentBytes = ethers.toUtf8Bytes(htmlContent);
+    const hash = ethers.keccak256(contentBytes);
+    console.log('Generated Hash:', hash);
+} catch (error) {
+    console.error('Error:', error.message);
+}

@@ -13,7 +13,7 @@ async function getFunctionSelectors(contractName) {
             const functionSignature = `${fragment.name}(${fragment.inputs.map((input) => input.type).join(",")})`;
             const selector = ethers.keccak256(ethers.toUtf8Bytes(functionSignature)).slice(0, 10);
             functionSelectors.push(selector);
-            console.log(`Processing function: ${fragment.name} => Signature: ${functionSignature} => Selector: ${selector}`); // Log for each function
+            // console.log(`Processing function: ${fragment.name} => Signature: ${functionSignature} => Selector: ${selector}`); // Log for each function
         }
     }
 
@@ -59,7 +59,7 @@ async function main() {
         console.log("MockERC20 deployed at:", addresses.MockERC20);
 
         // Save addresses to a JSON file
-        console.log("Saving deployed addresses to deployedAddresses.json...");
+        // console.log("Saving deployed addresses to deployedAddresses.json...");
         fs.writeFileSync("deployedAddresses.json", JSON.stringify(addresses, null, 2));
         console.log("Addresses saved to deployedAddresses.json");
 
